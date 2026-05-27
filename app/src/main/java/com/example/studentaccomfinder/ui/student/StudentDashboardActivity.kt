@@ -1,0 +1,65 @@
+package com.example.studentaccomfinder.ui.student
+
+import android.content.Intent
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+import com.example.studentaccomfinder.R
+import com.example.studentaccomfinder.databinding.ActivityStudentDashboardBinding
+import com.example.studentaccomfinder.ui.auth.LoginActivity
+import com.example.studentaccomfinder.utils.SessionManager
+import android.widget.Toast
+
+/**
+ * StudentDashboardActivity — Main screen for students after login
+ *
+ * Features:
+ * - Welcome message with student name
+ * - Browse accommodations button
+ * - View reservations button
+ * - Logout functionality
+ */
+class StudentDashboardActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityStudentDashboardBinding
+    private lateinit var sessionManager: SessionManager
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        binding = ActivityStudentDashboardBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        sessionManager = SessionManager(this)
+
+        setupUI()
+        setupClickListeners()
+    }
+
+    private fun setupUI() {
+        // Display welcome message
+        binding.tvWelcome.text = getString(R.string.welcome_student)
+        binding.tvSubtitle.text = getString(R.string.student_dashboard_subtitle)
+    }
+
+    private fun setupClickListeners() {
+        // Browse Listings — navigate to BrowseListingsActivity
+        binding.cardBrowse.setOnClickListener {
+            startActivity(Intent(this, BrowseListingsActivity::class.java))
+        }
+
+        // View Reservations — TODO for future step
+        binding.cardReservations.setOnClickListener {
+            Toast.makeText(this, "My Reservations - Coming soon", Toast.LENGTH_SHORT).show()
+            // startActivity(Intent(this, MyReservationsActivity::class.java))
+        }
+
+        // Logout
+        binding.btnLogout.setOnClickListener {
+            sessionManager.clearSession()
+            val intent = Intent(this, LoginActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            finish()
+        }
+    }
+}

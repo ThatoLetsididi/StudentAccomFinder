@@ -1,0 +1,64 @@
+<resources>
+    <string name="app_name">StudentAccomFinder</string>
+    <string name="app_title">Student Accommodation Finder</string>
+    <string name="welcome_back">Welcome Back</string>
+    <string name="email_address">Email Address</string>
+    <string name="password">Password</string>
+    <string name="login">Login</string>
+    <string name="register_link">Don\'t have an account? Register</string>
+    <string name="hello_world">Hello World!</string>
+
+    <!-- Register Activity Strings -->
+    <string name="create_account">Create Account</string>
+    <string name="i_am_a">I am a:</string>
+    <string name="student">Student</string>
+    <string name="provider">Provider</string>
+    <string name="full_name">Full Name</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="student_id">Student ID</string>
+    <string name="company_name">Company Name</string>
+    <string name="password_hint">Password (min 6 characters)</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="register">Register</string>
+    <string name="login_link">Already have an account? Login</string>
+    <string name="error_password_mismatch">Passwords do not match</string>
+    <string name="registration_success">Registration successful!</string>
+
+    <!-- Student Dashboard Strings -->
+    <string name="welcome_student">Welcome, Student!</string>
+    <string name="student_dashboard_subtitle">Find your perfect accommodation near BAC Francistown</string>
+    <string name="browse_listings">Browse Listings</string>
+    <string name="browse_listings_desc">Find accommodations by price, location, and availability</string>
+    <string name="my_reservations">My Reservations</string>
+    <string name="my_reservations_desc">View and manage your booked accommodations</string>
+
+    <!-- Provider Dashboard Strings -->
+    <string name="welcome_provider">Welcome, Provider!</string>
+    <string name="provider_dashboard_subtitle">Manage your accommodation listings</string>
+    <string name="manage_listings">Manage Listings</string>
+    <string name="manage_listings_desc">View, edit, or delete your existing listings</string>
+    <string name="add_new_listing">Add New Listing</string>
+    <string name="add_new_listing_desc">Create a new accommodation listing with images</string>
+
+    <!-- Browse Listings Strings -->
+    <string name="browse_accommodations">Browse Accommodations</string>
+    <string name="no_accommodations_available">No accommodations available.\nTap \'Generate Sample Data\' for demo.</string>
+    <string name="generate_sample_data">Generate Sample Data (Demo)</string>
+    <string name="filter">Filter</string>
+    <string name="back">Back</string>
+
+    <!-- Item Accommodation Strings -->
+    <string name="placeholder_title">Accommodation Title</string>
+    <string name="placeholder_location">Location details</string>
+    <string name="placeholder_price">P 0.00</string>
+    <string name="status_available">AVAILABLE</string>
+    <string name="accommodation_image">Accommodation Image</string>
+
+    <!-- Auth Common -->
+    <string name="error_fill_all_fields">Please fill all fields</string>
+    <string name="welcome_user">Welcome %1$s!</string>
+
+    <!-- Common Strings -->
+    <string name="logout">Logout</string>
+    <string name="type">Type</string>
+</resources>
