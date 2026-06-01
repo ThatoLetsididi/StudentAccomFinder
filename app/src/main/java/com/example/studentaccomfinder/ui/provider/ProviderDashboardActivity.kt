@@ -6,17 +6,11 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.studentaccomfinder.R
 import com.example.studentaccomfinder.databinding.ActivityProviderDashboardBinding
 import com.example.studentaccomfinder.ui.auth.LoginActivity
+import com.example.studentaccomfinder.ui.chat.InboxActivity
 import com.example.studentaccomfinder.utils.SessionManager
-import android.widget.Toast
 
 /**
  * ProviderDashboardActivity — Main screen for providers after login
- *
- * Features:
- * - Welcome message with provider/company name
- * - Manage listings button
- * - Add new listing button
- * - Logout functionality
  */
 class ProviderDashboardActivity : AppCompatActivity() {
 
@@ -36,21 +30,29 @@ class ProviderDashboardActivity : AppCompatActivity() {
     }
 
     private fun setupUI() {
-        binding.tvWelcome.text = getString(R.string.welcome_provider)
+        val userName = sessionManager.getUserName()
+        binding.tvWelcome.text = if (userName.isNotEmpty()) {
+            getString(R.string.welcome_user, userName)
+        } else {
+            getString(R.string.welcome_provider)
+        }
         binding.tvSubtitle.text = getString(R.string.provider_dashboard_subtitle)
     }
 
     private fun setupClickListeners() {
-        // Manage Listings — navigate to ManageListingsActivity
+        // Manage Listings
         binding.cardManage.setOnClickListener {
-            // TODO: Create ManageListingsActivity in future step
-            Toast.makeText(this, "Manage Listings - Coming soon", Toast.LENGTH_SHORT).show()
-            // startActivity(Intent(this, ManageListingsActivity::class.java))
+            startActivity(Intent(this, ManageListingsActivity::class.java))
         }
 
-        // Add New Listing — navigate to AddListingActivity
+        // Add New Listing
         binding.cardAdd.setOnClickListener {
             startActivity(Intent(this, AddListingActivity::class.java))
+        }
+
+        // Messages / Inbox
+        binding.cardMessages.setOnClickListener {
+            startActivity(Intent(this, InboxActivity::class.java))
         }
 
         // Logout

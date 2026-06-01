@@ -39,9 +39,14 @@ class ManageListingsActivity : AppCompatActivity() {
 
     private fun setupRecyclerView() {
         // Reuse AccommodationAdapter but with a click listener for management actions
-        adapter = AccommodationAdapter { accommodation ->
-            showActionDialog(accommodation)
-        }
+        adapter = AccommodationAdapter(
+            onItemClick = { accommodation ->
+                showActionDialog(accommodation)
+            },
+            onChatClick = { _ ->
+                // Providers typically don't chat with themselves from the management view
+            }
+        )
 
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
         binding.recyclerView.adapter = adapter
@@ -77,16 +82,23 @@ class ManageListingsActivity : AppCompatActivity() {
     }
 
     private fun showActionDialog(accommodation: Accommodation) {
-        val options = arrayOf("Edit (Not implemented)", "Delete")
+        val options = arrayOf("Edit Listing", "Delete Listing")
         AlertDialog.Builder(this)
             .setTitle(accommodation.title)
             .setItems(options) { _, which ->
                 when (which) {
-                    0 -> Toast.makeText(this, "Edit coming soon", Toast.LENGTH_SHORT).show()
+                    0 -> openEditActivity(accommodation)
                     1 -> showDeleteConfirmation(accommodation)
                 }
             }
             .show()
+    }
+
+    private fun openEditActivity(accommodation: Accommodation) {
+        val intent = Intent(this, AddListingActivity::class.java).apply {
+            putExtra("ACCOMMODATION_ID", accommodation.id)
+        }
+        startActivity(intent)
     }
 
     private fun showDeleteConfirmation(accommodation: Accommodation) {

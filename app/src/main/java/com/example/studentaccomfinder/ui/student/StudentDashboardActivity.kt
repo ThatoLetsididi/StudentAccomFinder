@@ -6,17 +6,11 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.studentaccomfinder.R
 import com.example.studentaccomfinder.databinding.ActivityStudentDashboardBinding
 import com.example.studentaccomfinder.ui.auth.LoginActivity
+import com.example.studentaccomfinder.ui.chat.InboxActivity
 import com.example.studentaccomfinder.utils.SessionManager
-import android.widget.Toast
 
 /**
  * StudentDashboardActivity — Main screen for students after login
- *
- * Features:
- * - Welcome message with student name
- * - Browse accommodations button
- * - View reservations button
- * - Logout functionality
  */
 class StudentDashboardActivity : AppCompatActivity() {
 
@@ -36,24 +30,28 @@ class StudentDashboardActivity : AppCompatActivity() {
     }
 
     private fun setupUI() {
-        // Display welcome message
-        binding.tvWelcome.text = getString(R.string.welcome_student)
+        val userName = sessionManager.getUserName()
+        binding.tvWelcome.text = if (userName.isNotEmpty()) {
+            getString(R.string.welcome_user, userName)
+        } else {
+            getString(R.string.welcome_student)
+        }
         binding.tvSubtitle.text = getString(R.string.student_dashboard_subtitle)
     }
 
     private fun setupClickListeners() {
-        // Browse Listings — navigate to BrowseListingsActivity
         binding.cardBrowse.setOnClickListener {
             startActivity(Intent(this, BrowseListingsActivity::class.java))
         }
 
-        // View Reservations — TODO for future step
         binding.cardReservations.setOnClickListener {
-            Toast.makeText(this, "My Reservations - Coming soon", Toast.LENGTH_SHORT).show()
-            // startActivity(Intent(this, MyReservationsActivity::class.java))
+            startActivity(Intent(this, MyReservationsActivity::class.java))
         }
 
-        // Logout
+        binding.cardMessages.setOnClickListener {
+            startActivity(Intent(this, InboxActivity::class.java))
+        }
+
         binding.btnLogout.setOnClickListener {
             sessionManager.clearSession()
             val intent = Intent(this, LoginActivity::class.java)

@@ -26,7 +26,10 @@ object GlideHelper {
             .centerCrop()
 
         // Determine if this is a local drawable reference
-        val resourceId = if (!imageSource.isNullOrEmpty() && !imageSource.startsWith("http")) {
+        val resourceId = if (!imageSource.isNullOrEmpty() && 
+            !imageSource.startsWith("http") && 
+            !imageSource.startsWith("content") &&
+            !imageSource.startsWith("/")) {
             context.resources.getIdentifier(
                 imageSource,
                 "drawable",
@@ -34,9 +37,13 @@ object GlideHelper {
             ).takeIf { it != 0 }
         } else null
 
-        val loadTarget = when {
+        val loadTarget: Any? = when {
             resourceId != null -> resourceId
-            !imageSource.isNullOrEmpty() -> imageSource
+            !imageSource.isNullOrEmpty() && (
+                imageSource.startsWith("http") || 
+                imageSource.startsWith("content") || 
+                imageSource.startsWith("/")
+            ) -> imageSource
             else -> null
         }
 
@@ -72,17 +79,27 @@ object GlideHelper {
     fun preloadImage(context: Context, imageSource: String?) {
         if (imageSource.isNullOrEmpty()) return
 
-        val resourceId = if (!imageSource.startsWith("http")) {
+        val resourceId = if (!imageSource.startsWith("http") && 
+            !imageSource.startsWith("content") &&
+            !imageSource.startsWith("/")) {
             context.resources.getIdentifier(imageSource, "drawable", context.packageName)
                 .takeIf { it != 0 }
         } else null
 
-        val loadTarget = resourceId ?: imageSource
+        val loadTarget: Any? = when {
+            resourceId != null -> resourceId
+            imageSource.startsWith("http") || 
+            imageSource.startsWith("content") || 
+            imageSource.startsWith("/") -> imageSource
+            else -> null
+        }
 
-        Glide.with(context)
-            .load(loadTarget)
-            .diskCacheStrategy(DiskCacheStrategy.ALL)
-            .preload()
+        if (loadTarget != null) {
+            Glide.with(context)
+                .load(loadTarget)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .preload()
+        }
     }
 
     /**

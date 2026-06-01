@@ -1,11 +1,13 @@
 package com.example.studentaccomfinder.ui.student
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.studentaccomfinder.databinding.ActivityMyReservationsBinding
+import com.example.studentaccomfinder.ui.chat.ChatActivity
 import com.example.studentaccomfinder.utils.SessionManager
 import com.example.studentaccomfinder.viewmodel.AccommodationViewModel
 
@@ -33,9 +35,18 @@ class MyReservationsActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
-        adapter = AccommodationAdapter { accommodation ->
-            // Optionally show details or allow canceling reservation
-        }
+        adapter = AccommodationAdapter(
+            onItemClick = { accommodation ->
+                // Optionally show details
+            },
+            onChatClick = { accommodation ->
+                val intent = Intent(this, ChatActivity::class.java).apply {
+                    putExtra("RECEIVER_ID", accommodation.providerId)
+                    putExtra("RECEIVER_NAME", "Provider")
+                }
+                startActivity(intent)
+            }
+        )
 
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
         binding.recyclerView.adapter = adapter

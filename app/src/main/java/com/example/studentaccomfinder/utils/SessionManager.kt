@@ -23,10 +23,11 @@ class SessionManager(context: Context) {
     /**
      * Save user session after successful login
      */
-    fun saveUserSession(userId: Long, role: String) {
+    fun saveUserSession(userId: Long, role: String, name: String) {
         prefs.edit().apply {
             putLong(Constants.KEY_LOGGED_IN_USER_ID, userId)
             putString(Constants.KEY_USER_ROLE, role)
+            putString(Constants.KEY_USER_NAME, name)
             apply()  // apply() is async (faster), commit() is synchronous
         }
     }
@@ -52,6 +53,13 @@ class SessionManager(context: Context) {
      */
     fun getUserRole(): String? {
         return prefs.getString(Constants.KEY_USER_ROLE, null)
+    }
+
+    /**
+     * Get logged-in user name
+     */
+    fun getUserName(): String {
+        return prefs.getString(Constants.KEY_USER_NAME, "") ?: ""
     }
 
     /**

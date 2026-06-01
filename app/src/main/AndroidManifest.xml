@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.studentaccomfinder">
 
     <!-- Internet -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -13,7 +14,6 @@
 
     <!-- Storage - Use older permission for API 24 compatibility -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <!-- Remove READ_MEDIA_IMAGES (requires API 33) -->
 
     <application
         android:allowBackup="true"
@@ -22,11 +22,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.StudentAccomFinder">
-        <!-- Remove android:enableOnBackInvokedCallback (API 33+) -->
 
         <!-- Login launcher (first screen) -->
         <activity
-            android:name=".ui.auth.LoginActivity"
+            android:name="com.example.studentaccomfinder.ui.auth.LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -35,28 +34,45 @@
         </activity>
 
         <activity
-            android:name=".MainActivity"
+            android:name="com.example.studentaccomfinder.MainActivity"
             android:exported="false" />
 
         <!-- Registration screen -->
         <activity
-            android:name=".ui.auth.RegisterActivity"
+            android:name="com.example.studentaccomfinder.ui.auth.RegisterActivity"
             android:exported="false" />
 
         <activity
-            android:name=".ui.student.StudentDashboardActivity"
+            android:name="com.example.studentaccomfinder.ui.student.StudentDashboardActivity"
             android:exported="false" />
 
         <activity
-            android:name=".ui.student.BrowseListingsActivity"
+            android:name="com.example.studentaccomfinder.ui.student.BrowseListingsActivity"
             android:exported="false" />
 
         <activity
-            android:name=".ui.provider.ProviderDashboardActivity"
+            android:name="com.example.studentaccomfinder.ui.student.MyReservationsActivity"
             android:exported="false" />
 
         <activity
-            android:name=".ui.provider.AddListingActivity"
+            android:name="com.example.studentaccomfinder.ui.student.PaymentActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="com.example.studentaccomfinder.ui.chat.ChatActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name="com.example.studentaccomfinder.ui.provider.ProviderDashboardActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="com.example.studentaccomfinder.ui.provider.AddListingActivity"
+            android:exported="false" />
+
+        <activity
+            android:name="com.example.studentaccomfinder.ui.provider.ManageListingsActivity"
             android:exported="false" />
 
     </application>

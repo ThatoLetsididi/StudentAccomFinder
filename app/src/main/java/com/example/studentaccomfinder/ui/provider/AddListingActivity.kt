@@ -1,21 +1,27 @@
 package com.example.studentaccomfinder.ui.provider
 
 import android.app.DatePickerDialog
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.example.studentaccomfinder.data.local.entity.Accommodation
 import com.example.studentaccomfinder.databinding.ActivityAddListingBinding
 import com.example.studentaccomfinder.utils.Constants
 import com.example.studentaccomfinder.utils.GlideHelper
 import com.example.studentaccomfinder.utils.SessionManager
 import com.example.studentaccomfinder.viewmodel.AccommodationViewModel
+import kotlinx.coroutines.launch
 import java.util.Calendar
 
 /**
- * AddListingActivity — Provider creates new accommodation listing
+ * AddListingActivity — Provider creates or edits accommodation listing
+ * Now supports real image selection from gallery.
  */
 class AddListingActivity : AppCompatActivity() {
 
@@ -24,7 +30,18 @@ class AddListingActivity : AppCompatActivity() {
     private lateinit var sessionManager: SessionManager
 
     private var selectedDate: Long = System.currentTimeMillis()
-    private var selectedImageName: String = "house_1"  // Default image
+    private var selectedImageSource: String? = "house_1" // Default image or URI string
+    private var editingAccommodation: Accommodation? = null
+
+    // Photo Picker Launcher
+    private val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        if (uri != null) {
+            // Persist permission for local URI if needed (simplified for this demo)
+            contentResolver.takePersistableUriPermission(uri, android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            selectedImageSource = uri.toString()
+            GlideHelper.loadAccommodationImage(this, binding.ivPreview, selectedImageSource)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,14 +53,50 @@ class AddListingActivity : AppCompatActivity() {
         setupUI()
         setupClickListeners()
         observeViewModel()
+
+        // Check if we are in Edit Mode
+        val accommodationId = intent.getLongExtra("ACCOMMODATION_ID", -1L)
+        if (accommodationId != -1L) {
+            loadAccommodationForEdit(accommodationId)
+        }
     }
 
     private fun setupUI() {
         // Load default image preview
-        GlideHelper.loadAccommodationImage(this, binding.ivPreview, selectedImageName)
-
-        // Set default date to today
+        GlideHelper.loadAccommodationImage(this, binding.ivPreview, selectedImageSource)
         updateDateDisplay()
+    }
+
+    private fun loadAccommodationForEdit(id: Long) {
+        lifecycleScope.launch {
+            val accommodation = viewModel.getListingById(id)
+            if (accommodation != null) {
+                editingAccommodation = accommodation
+                populateFields(accommodation)
+            } else {
+                Toast.makeText(this@AddListingActivity, "Listing not found", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+        }
+    }
+
+    private fun populateFields(accommodation: Accommodation) {
+        binding.tvTitle.text = "Edit Listing"
+        binding.btnSubmit.text = "Update Listing"
+        
+        binding.etTitle.setText(accommodation.title)
+        binding.etDescription.setText(accommodation.description)
+        binding.etPrice.setText(accommodation.price.toString())
+        binding.etLocation.setText(accommodation.location)
+        binding.etType.setText(accommodation.type)
+        binding.etAmenities.setText(accommodation.amenities)
+        binding.etDeposit.setText(accommodation.depositAmount.toString())
+        
+        selectedDate = accommodation.availabilityDate
+        updateDateDisplay()
+        
+        selectedImageSource = accommodation.imageName
+        GlideHelper.loadAccommodationImage(this, binding.ivPreview, selectedImageSource)
     }
 
     private fun setupClickListeners() {
@@ -52,9 +105,9 @@ class AddListingActivity : AppCompatActivity() {
             showDatePicker()
         }
 
-        // Image selection (cycle through sample images for demo)
+        // Real Gallery Image Selection
         binding.btnSelectImage.setOnClickListener {
-            cycleSampleImage()
+            pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         }
 
         // Submit button
@@ -69,7 +122,7 @@ class AddListingActivity : AppCompatActivity() {
     }
 
     private fun showDatePicker() {
-        val calendar = Calendar.getInstance()
+        val calendar = Calendar.getInstance().apply { timeInMillis = selectedDate }
         DatePickerDialog(
             this,
             { _, year, month, day ->
@@ -89,14 +142,6 @@ class AddListingActivity : AppCompatActivity() {
         binding.tvSelectedDate.text = "Available from: $dateStr"
     }
 
-    private fun cycleSampleImage() {
-        // Cycle through house_1 to house_10 for demo
-        val currentNum = selectedImageName.removePrefix("house_").toIntOrNull() ?: 1
-        val nextNum = if (currentNum >= 10) 1 else currentNum + 1
-        selectedImageName = "house_$nextNum"
-        GlideHelper.loadAccommodationImage(this, binding.ivPreview, selectedImageName)
-    }
-
     private fun submitListing() {
         val providerId = sessionManager.getUserId()
         if (providerId == -1L) {
@@ -112,7 +157,6 @@ class AddListingActivity : AppCompatActivity() {
         val amenities = binding.etAmenities.text.toString().trim()
         val depositStr = binding.etDeposit.text.toString().trim()
 
-        // Validation
         if (title.isEmpty() || priceStr.isEmpty() || location.isEmpty()) {
             Toast.makeText(this, "Please fill all required fields", Toast.LENGTH_SHORT).show()
             return
@@ -121,7 +165,17 @@ class AddListingActivity : AppCompatActivity() {
         val price = priceStr.toDoubleOrNull() ?: 0.0
         val deposit = depositStr.toDoubleOrNull() ?: (price * Constants.MIN_DEPOSIT_PERCENTAGE)
 
-        val accommodation = Accommodation(
+        val accommodation = editingAccommodation?.copy(
+            title = title,
+            description = description,
+            price = price,
+            location = location,
+            type = type.ifEmpty { "Apartment" },
+            amenities = amenities,
+            availabilityDate = selectedDate,
+            depositAmount = deposit,
+            imageName = selectedImageSource
+        ) ?: Accommodation(
             providerId = providerId,
             title = title,
             description = description,
@@ -131,12 +185,16 @@ class AddListingActivity : AppCompatActivity() {
             amenities = amenities,
             availabilityDate = selectedDate,
             depositAmount = deposit,
-            imageName = selectedImageName,
-            latitude = Constants.BAC_LATITUDE,  // Default to campus for demo
+            imageName = selectedImageSource,
+            latitude = Constants.BAC_LATITUDE,
             longitude = Constants.BAC_LONGITUDE
         )
 
-        viewModel.addListing(accommodation)
+        if (editingAccommodation != null) {
+            viewModel.updateListing(accommodation)
+        } else {
+            viewModel.addListing(accommodation)
+        }
     }
 
     private fun observeViewModel() {
@@ -146,15 +204,17 @@ class AddListingActivity : AppCompatActivity() {
         }
 
         viewModel.addResult.observe(this) { result ->
-            result.fold(
-                onSuccess = {
-                    Toast.makeText(this, "Listing created successfully!", Toast.LENGTH_SHORT).show()
-                    finish()
-                },
-                onFailure = { exception ->
-                    Toast.makeText(this, exception.message, Toast.LENGTH_LONG).show()
-                }
-            )
+            if (result.isSuccess) {
+                Toast.makeText(this, "Listing created successfully!", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+        }
+
+        viewModel.updateResult.observe(this) { result ->
+            if (result.isSuccess) {
+                Toast.makeText(this, "Listing updated successfully!", Toast.LENGTH_SHORT).show()
+                finish()
+            }
         }
     }
 }

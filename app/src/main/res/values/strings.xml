@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">StudentAccomFinder</string>
     <string name="app_title">Student Accommodation Finder</string>
-    <string name="welcome_back">Welcome Back</string>
+    <string name="welcome_back">Botswana School of Business Science Version 2.7</string>
     <string name="email_address">Email Address</string>
     <string name="password">Password</string>
     <string name="login">Login</string>
@@ -39,6 +39,8 @@
     <string name="manage_listings_desc">View, edit, or delete your existing listings</string>
     <string name="add_new_listing">Add New Listing</string>
     <string name="add_new_listing_desc">Create a new accommodation listing with images</string>
+    <string name="messages">Messages</string>
+    <string name="messages_desc">Reply to student inquiries and view chat history</string>
 
     <!-- Browse Listings Strings -->
     <string name="browse_accommodations">Browse Accommodations</string>
@@ -61,4 +63,6 @@
     <!-- Common Strings -->
     <string name="logout">Logout</string>
     <string name="type">Type</string>
+    <string name="inbox">Inbox</string>
+    <string name="no_messages">No messages yet.</string>
 </resources>

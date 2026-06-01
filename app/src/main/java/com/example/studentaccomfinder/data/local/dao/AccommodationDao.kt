@@ -38,6 +38,10 @@ interface AccommodationDao {
     @Query("SELECT * FROM accommodations WHERE status = 'AVAILABLE' ORDER BY price ASC")
     fun getAvailableAccommodations(): Flow<List<Accommodation>>
 
+    /** Get student's reserved listings */
+    @Query("SELECT * FROM accommodations WHERE reservedByStudentId = :studentId ORDER BY createdAt DESC")
+    fun getReservationsByStudent(studentId: Long): Flow<List<Accommodation>>
+
     /** Filter by price range */
     @Query("SELECT * FROM accommodations WHERE price BETWEEN :minPrice AND :maxPrice AND status = 'AVAILABLE'")
     fun filterByPrice(minPrice: Double, maxPrice: Double): Flow<List<Accommodation>>
@@ -56,13 +60,14 @@ interface AccommodationDao {
     @Query("SELECT * FROM accommodations WHERE price BETWEEN :minPrice AND :maxPrice AND location LIKE '%' || :location || '%' AND availabilityDate <= :date AND status = 'AVAILABLE' ORDER BY price ASC")
     fun filterCombined(minPrice: Double, maxPrice: Double, location: String, date: Long): Flow<List<Accommodation>>
 
-    /** Reserve listing (update status and student) */
-    @Query("UPDATE accommodations SET status = 'RESERVED', reservedByStudentId = :studentId WHERE id = :accommodationId")
-    suspend fun reserveAccommodation(accommodationId: Long, studentId: Long)
+    /** 
+     * Reserve listing (update status and student)
+     * Added check for status = 'AVAILABLE' to prevent double booking
+     */
+    @Query("UPDATE accommodations SET status = 'RESERVED', reservedByStudentId = :studentId WHERE id = :accommodationId AND status = 'AVAILABLE'")
+    suspend fun reserveAccommodation(accommodationId: Long, studentId: Long): Int
 
     /** Get count of listings by provider */
     @Query("SELECT COUNT(*) FROM accommodations WHERE providerId = :providerId")
     suspend fun getListingCount(providerId: Long): Int
-
-
 }

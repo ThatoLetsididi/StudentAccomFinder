@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 class AccommodationViewModel(application: Application) : AndroidViewModel(application) {
 
     // ═══════════════════════════════════════════════════════
-    // Filter Criteria Data Class (MOVED TO TOP)
+    // Filter Criteria Data Class
     // ═══════════════════════════════════════════════════════
     /**
      * Holds current filter values
@@ -41,7 +41,7 @@ class AccommodationViewModel(application: Application) : AndroidViewModel(applic
     val isLoading: LiveData<Boolean> = _isLoading
 
     // ═══════════════════════════════════════════════════════
-    // CRUD Results
+    // Results
     // ═══════════════════════════════════════════════════════
     private val _addResult = MutableLiveData<Result<Long>>()
     val addResult: LiveData<Result<Long>> = _addResult
@@ -51,6 +51,9 @@ class AccommodationViewModel(application: Application) : AndroidViewModel(applic
 
     private val _deleteResult = MutableLiveData<Result<Unit>>()
     val deleteResult: LiveData<Result<Unit>> = _deleteResult
+
+    private val _reserveResult = MutableLiveData<Result<String>>()
+    val reserveResult: LiveData<Result<String>> = _reserveResult
 
     // ═══════════════════════════════════════════════════════
     // Filter State
@@ -100,6 +103,14 @@ class AccommodationViewModel(application: Application) : AndroidViewModel(applic
         }
     }
 
+    fun reserveListing(accommodationId: Long, studentId: Long) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _reserveResult.value = repository.reserveAccommodation(accommodationId, studentId)
+            _isLoading.value = false
+        }
+    }
+
     // ═══════════════════════════════════════════════════════
     // Data Retrieval (Flow converted to LiveData)
     // ═══════════════════════════════════════════════════════
@@ -116,6 +127,20 @@ class AccommodationViewModel(application: Application) : AndroidViewModel(applic
      */
     fun getProviderListingsLiveData(providerId: Long): LiveData<List<Accommodation>> {
         return repository.getProviderListings(providerId).asLiveData()
+    }
+
+    /**
+     * Get student's reserved listings
+     */
+    fun getStudentReservationsLiveData(studentId: Long): LiveData<List<Accommodation>> {
+        return repository.getStudentReservations(studentId).asLiveData()
+    }
+
+    /**
+     * Get single listing by ID
+     */
+    suspend fun getListingById(id: Long): Accommodation? {
+        return repository.getListingById(id)
     }
 
     // ═══════════════════════════════════════════════════════

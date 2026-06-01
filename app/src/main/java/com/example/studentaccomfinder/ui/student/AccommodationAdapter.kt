@@ -13,14 +13,10 @@ import java.util.Locale
 
 /**
  * AccommodationAdapter — RecyclerView adapter for accommodation listings
- *
- * Why ListAdapter?
- * - Automatically handles item animations
- * - Efficient diff calculation (only updates changed items)
- * - Better performance than RecyclerView.Adapter
  */
 class AccommodationAdapter(
-    private val onItemClick: (Accommodation) -> Unit
+    private val onItemClick: (Accommodation) -> Unit,
+    private val onChatClick: (Accommodation) -> Unit
 ) : ListAdapter<Accommodation, AccommodationAdapter.ViewHolder>(DiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -46,6 +42,14 @@ class AccommodationAdapter(
                 val position = adapterPosition
                 if (position != RecyclerView.NO_POSITION) {
                     onItemClick(getItem(position))
+                }
+            }
+
+            // Set click listener on the chat button
+            binding.btnChat.setOnClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    onChatClick(getItem(position))
                 }
             }
         }

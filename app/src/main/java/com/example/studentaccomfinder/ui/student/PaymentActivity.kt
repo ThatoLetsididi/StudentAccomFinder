@@ -44,18 +44,6 @@ class PaymentActivity : AppCompatActivity() {
     }
 
     private fun loadAccommodationDetails() {
-        // We use a coroutine in the activity or just let the viewModel fetch it if we had a "getById" liveData
-        // For simplicity, we'll use a suspending call in a lifecycle scope if available or just fetch via viewModel
-        lifecycle.run {
-            // Since we updated ViewModel with getListingById, we can call it
-            import kotlinx.coroutines.MainScope
-            import kotlinx.coroutines.launch
-            
-            // Re-evaluating: I don't want to mess up imports. 
-            // I'll just use the viewModel to observe the specific item if I had that, 
-            // or better yet, pass title and price via Intent for speed.
-        }
-        
         val title = intent.getStringExtra("ACCOMMODATION_TITLE") ?: "Accommodation"
         val price = intent.getDoubleExtra("ACCOMMODATION_PRICE", 0.0)
         
@@ -98,9 +86,10 @@ class PaymentActivity : AppCompatActivity() {
                 showSuccess(ref)
             } else {
                 binding.btnPay.isEnabled = true
-                Toast.makeText(this, result.exceptionOrNull()?.message, Toast.LENGTH_LONG).show()
-                // If it's already reserved, we might want to finish
-                if (result.exceptionOrNull()?.message?.contains("already reserved") == true) {
+                val errorMessage = result.exceptionOrNull()?.message ?: "Reservation failed"
+                Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
+                
+                if (errorMessage.contains("already reserved", ignoreCase = true)) {
                     finish()
                 }
             }

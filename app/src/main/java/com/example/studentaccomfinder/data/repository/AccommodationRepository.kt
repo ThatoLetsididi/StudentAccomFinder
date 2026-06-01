@@ -3,6 +3,7 @@ package com.example.studentaccomfinder.data.repository
 import com.example.studentaccomfinder.data.local.AppDatabase
 import com.example.studentaccomfinder.data.local.entity.Accommodation
 import kotlinx.coroutines.flow.Flow
+import java.util.UUID
 
 /**
  * AccommodationRepository — single source of truth for listings
@@ -57,6 +58,10 @@ class AccommodationRepository(database: AppDatabase) {
         return accommodationDao.getAvailableAccommodations()
     }
 
+    fun getStudentReservations(studentId: Long): Flow<List<Accommodation>> {
+        return accommodationDao.getReservationsByStudent(studentId)
+    }
+
     suspend fun getListingById(id: Long): Accommodation? {
         return accommodationDao.getAccommodationById(id)
     }
@@ -75,5 +80,24 @@ class AccommodationRepository(database: AppDatabase) {
 
     fun filterCombined(minPrice: Double, maxPrice: Double, location: String, date: Long): Flow<List<Accommodation>> {
         return accommodationDao.filterCombined(minPrice, maxPrice, location, date)
+    }
+
+    /**
+     * Attempts to reserve an accommodation.
+     * Returns a Result containing a reference number if successful.
+     */
+    suspend fun reserveAccommodation(accommodationId: Long, studentId: Long): Result<String> {
+        return try {
+            val rowsAffected = accommodationDao.reserveAccommodation(accommodationId, studentId)
+            if (rowsAffected > 0) {
+                // Generate a simulated reference number
+                val ref = "REF-" + UUID.randomUUID().toString().substring(0, 8).uppercase()
+                Result.success(ref)
+            } else {
+                Result.failure(Exception("Accommodation is no longer available or already reserved."))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }

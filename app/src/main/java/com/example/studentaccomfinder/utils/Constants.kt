@@ -46,6 +46,7 @@ object Constants {
     const val PREFS_NAME = "accom_finder_prefs"
     const val KEY_LOGGED_IN_USER_ID = "logged_in_user_id"
     const val KEY_USER_ROLE = "user_role"
+    const val KEY_USER_NAME = "user_name"
 
     // ═══════════════════════════════════════════════════════
     // Payment simulation constants

@@ -79,7 +79,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
             if (user != null) {
                 // Save session for auto-login next time
-                sessionManager.saveUserSession(user.id, user.role)
+                sessionManager.saveUserSession(user.id, user.role, user.fullName)
                 _loginResult.value = Result.success(user)
             } else {
                 _loginResult.value = Result.failure(

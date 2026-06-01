@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.studentaccomfinder.data.local.entity.Accommodation
 import com.example.studentaccomfinder.databinding.ActivityBrowseListingsBinding
+import com.example.studentaccomfinder.ui.chat.ChatActivity
 import com.example.studentaccomfinder.utils.SampleDataGenerator
 import com.example.studentaccomfinder.utils.SessionManager
 import com.example.studentaccomfinder.viewmodel.AccommodationViewModel
@@ -42,9 +43,14 @@ class BrowseListingsActivity : AppCompatActivity() {
      * Setup RecyclerView with AccommodationAdapter
      */
     private fun setupRecyclerView() {
-        adapter = AccommodationAdapter { accommodation ->
-            onAccommodationClicked(accommodation)
-        }
+        adapter = AccommodationAdapter(
+            onItemClick = { accommodation ->
+                onAccommodationClicked(accommodation)
+            },
+            onChatClick = { accommodation ->
+                openChat(accommodation)
+            }
+        )
 
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
         binding.recyclerView.adapter = adapter
@@ -77,11 +83,11 @@ class BrowseListingsActivity : AppCompatActivity() {
     private fun observeViewModel() {
         // Loading state
         viewModel.isLoading.observe(this) { isLoading ->
-            // ProgressBar removed - use btnGenerateData enabled state instead
+            // Use btnGenerateData enabled state
             binding.btnGenerateData.isEnabled = !isLoading
         }
 
-        // Filtered results (used after applying filters)
+        // Filtered results
         viewModel.filterResult.observe(this) { listings ->
             updateListingsUI(listings)
         }
@@ -123,20 +129,34 @@ class BrowseListingsActivity : AppCompatActivity() {
         binding.tvEmpty.visibility = View.GONE
         binding.recyclerView.visibility = View.VISIBLE
         adapter.submitList(listings)
-
-        // Update count
-        Toast.makeText(this, "${listings.size} listings found", Toast.LENGTH_SHORT).show()
     }
 
     /**
-     * Handle accommodation item click
+     * Handle accommodation item click - Navigate to Payment
      */
     private fun onAccommodationClicked(accommodation: Accommodation) {
-        Toast.makeText(
-            this,
-            "Selected: ${accommodation.title}\nPrice: P${accommodation.price}",
-            Toast.LENGTH_SHORT
-        ).show()
+        if (accommodation.status != "AVAILABLE") {
+            Toast.makeText(this, "This accommodation is already reserved", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val intent = Intent(this, PaymentActivity::class.java).apply {
+            putExtra("ACCOMMODATION_ID", accommodation.id)
+            putExtra("ACCOMMODATION_TITLE", accommodation.title)
+            putExtra("ACCOMMODATION_PRICE", accommodation.price)
+        }
+        startActivity(intent)
+    }
+
+    /**
+     * Open Chat with the provider
+     */
+    private fun openChat(accommodation: Accommodation) {
+        val intent = Intent(this, ChatActivity::class.java).apply {
+            putExtra("RECEIVER_ID", accommodation.providerId)
+            putExtra("RECEIVER_NAME", "Provider") // In a real app, you'd fetch the provider name
+        }
+        startActivity(intent)
     }
 
     /**
@@ -144,7 +164,8 @@ class BrowseListingsActivity : AppCompatActivity() {
      */
     private fun showFilterBottomSheet() {
         val filterSheet = FilterBottomSheet(viewModel) {
-            // Callback when filters applied or cleared
+            // After applying filters, the viewModel.filterResult will be updated
+            // and observed in observeViewModel()
         }
         filterSheet.show(supportFragmentManager, "FilterBottomSheet")
     }
@@ -154,20 +175,18 @@ class BrowseListingsActivity : AppCompatActivity() {
      */
     private fun generateSampleData() {
         SampleDataGenerator.generateSampleListings(this)
-        Toast.makeText(this, "Generating 50 sample listings...", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Generating sample listings...", Toast.LENGTH_SHORT).show()
 
-        // Refresh after short delay to allow database insertion
+        // Refresh after short delay
         binding.recyclerView.postDelayed({
-            recreate()
+            // Re-observe to refresh list
+            loadAllListings()
         }, 1000)
     }
 
-    /**
-     * Handle back press - FIXED: Added super call
-     */
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-        super.onBackPressed()  // ✅ FIXED: Added super call
+        super.onBackPressed()
         finish()
     }
 }
